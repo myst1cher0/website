@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MysticHero</title>
+<meta name="description" content="MysticHero: who I am and the projects I make.">
+<meta name="theme-color" content="#0a0820">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0820;
+    --violet: #7a5cff;
+    --aqua: #38e1d1;
+    --rose: #ff7ab8;
+    --gold: #ffc46b;
+    --mist: #eef0ff;
+    --text: rgba(238, 240, 255, 0.84);
+    --display: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+    --body: 'Figtree', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+    --pad: clamp(16px, 4vw, 40px);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--ink);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-family: var(--display); color: var(--mist); margin: 0; line-height: 1.05; }
+  p { margin: 0; }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--aqua); outline-offset: 3px; }
+
+  /* ---------- Backdrop that the glass sits on ---------- */
+  .backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--ink); }
+  .blob { position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.75; will-change: transform; }
+  .blob-1 { width: 55vmax; height: 55vmax; left: -15vmax; top: -18vmax; background: radial-gradient(circle, var(--violet), transparent 65%); animation: drift-a 38s ease-in-out infinite alternate; }
+  .blob-2 { width: 46vmax; height: 46vmax; right: -14vmax; top: 18vh; background: radial-gradient(circle, var(--aqua), transparent 65%); opacity: 0.5; animation: drift-b 46s ease-in-out infinite alternate; }
+  .blob-3 { width: 40vmax; height: 40vmax; left: 12vw; bottom: -22vmax; background: radial-gradient(circle, var(--rose), transparent 65%); opacity: 0.55; animation: drift-c 42s ease-in-out infinite alternate; }
+  @keyframes drift-a { to { transform: translate3d(9vw, 8vh, 0) scale(1.08); } }
+  @keyframes drift-b { to { transform: translate3d(-10vw, 10vh, 0) scale(0.94); } }
+  @keyframes drift-c { to { transform: translate3d(12vw, -8vh, 0) scale(1.1); } }
+
+  /* Crisp shapes so the glass has something to bend light around */
+  .orb { position: absolute; border-radius: 50%; z-index: 0; pointer-events: none; }
+  .orb-a {
+    width: clamp(180px, 26vw, 340px); aspect-ratio: 1; right: 4%; top: 6%;
+    background:
+      radial-gradient(circle at 30% 26%, rgba(255,255,255,0.75), transparent 18%),
+      radial-gradient(circle at 34% 30%, var(--gold), var(--rose) 55%, var(--violet) 100%);
+  }
+  .orb-b {
+    width: clamp(120px, 16vw, 210px); aspect-ratio: 1; left: -2%; top: 46%;
+    background:
+      radial-gradient(circle at 30% 26%, rgba(255,255,255,0.7), transparent 18%),
+      radial-gradient(circle at 34% 30%, var(--aqua), var(--violet) 90%);
+  }
+
+  /* ---------- Liquid glass ---------- */
+  .glass {
+    --r: 24px;
+    position: relative;
+    border-radius: var(--r);
+    background: linear-gradient(140deg, rgba(255,255,255,0.17), rgba(255,255,255,0.05));
+    -webkit-backdrop-filter: blur(22px) saturate(185%);
+    backdrop-filter: blur(22px) saturate(185%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 1px 0 0 rgba(255,255,255,0.18),
+      inset 0 -1px 0 rgba(255,255,255,0.08),
+      0 24px 48px -24px rgba(4, 2, 30, 0.7);
+  }
+  /* bright rim that catches light on opposite corners */
+  .glass::before {
+    content: "";
+    position: absolute; inset: 0; padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(140deg, rgba(255,255,255,0.75), rgba(255,255,255,0.06) 32%, rgba(255,255,255,0.06) 68%, rgba(255,255,255,0.5));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+  /* specular highlight that follows the pointer */
+  .glass::after {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,0.26), transparent 62%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .glass:hover::after { opacity: 1; }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass { background: rgba(38, 30, 92, 0.82); }
+  }
+
+  /* ---------- Header + menu ---------- */
+  .site-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: calc(14px + env(safe-area-inset-top, 0px)) var(--pad) 0;
+  }
+  .emblem {
+    --r: 999px;
+    width: 48px; height: 48px;
+    display: grid; place-items: center;
+    font-family: var(--display); font-weight: 800; font-size: 1rem; color: var(--mist);
+    letter-spacing: -0.02em;
+  }
+  .menu-btn {
+    --r: 999px;
+    width: 48px; height: 48px;
+    border: 0; padding: 0; cursor: pointer; color: var(--mist);
+    display: grid; place-items: center;
+    font: inherit;
+  }
+  .menu-btn .bars { position: relative; width: 20px; height: 14px; }
+  .menu-btn .bars span {
+    position: absolute; left: 0; width: 100%; height: 2px; border-radius: 2px; background: currentColor;
+    transition: transform 0.35s cubic-bezier(.3,.9,.3,1), opacity 0.2s ease, top 0.35s cubic-bezier(.3,.9,.3,1);
+  }
+  .menu-btn .bars span:nth-child(1) { top: 0; }
+  .menu-btn .bars span:nth-child(2) { top: 6px; }
+  .menu-btn .bars span:nth-child(3) { top: 12px; }
+  .menu-open .menu-btn .bars span:nth-child(1) { top: 6px; transform: rotate(45deg); }
+  .menu-open .menu-btn .bars span:nth-child(2) { opacity: 0; }
+  .menu-open .menu-btn .bars span:nth-child(3) { top: 6px; transform: rotate(-45deg); }
+
+  .scrim { position: fixed; inset: 0; z-index: 20; background: rgba(6, 4, 24, 0.35); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+  .menu-open .scrim { opacity: 1; pointer-events: auto; }
+
+  .menu-panel {
+    --r: 32px;
+    position: fixed; z-index: 40;
+    top: calc(72px + env(safe-area-inset-top, 0px));
+    right: var(--pad);
+    width: min(320px, calc(100vw - 2 * var(--pad)));
+    padding: 12px;
+    transform-origin: top right;
+    opacity: 0; transform: scale(0.92) translateY(-8px); pointer-events: none; visibility: hidden;
+    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(.3,.9,.3,1), visibility 0s linear 0.35s;
+  }
+  .menu-open .menu-panel { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
+  .menu-panel ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .menu-panel a {
+    display: block; padding: 14px 18px; border-radius: 20px;
+    font-family: var(--display); font-weight: 700; font-size: 1.5rem; color: var(--mist);
+    transition: background 0.2s ease;
+  }
+  .menu-panel a:hover, .menu-panel a:focus-visible { background: rgba(255,255,255,0.14); }
+  .menu-panel a[aria-current="page"] { background: rgba(255,255,255,0.1); }
+
+  /* ---------- Layout ---------- */
+  main { position: relative; }
+  .wrap { width: 100%; max-width: 1120px; margin-inline: auto; padding-inline: var(--pad); position: relative; }
+
+  .hero { padding-top: clamp(110px, 16vh, 170px); padding-bottom: clamp(56px, 9vw, 110px); }
+  .hero-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(24px, 5vw, 64px); align-items: center; position: relative; z-index: 1; }
+  .hero h1 {
+    font-weight: 800;
+    font-size: clamp(3.1rem, 10.5vw, 7.6rem);
+    letter-spacing: -0.045em;
+    background: linear-gradient(180deg, #ffffff 30%, #c9c0ff 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lede { margin-top: 20px; max-width: 30ch; font-size: clamp(1.15rem, 2.2vw, 1.45rem); line-height: 1.45; color: var(--mist); }
+  .cta {
+    --r: 999px;
+    display: inline-block; margin-top: 30px; padding: 14px 26px;
+    font-weight: 600; color: var(--mist);
+  }
+
+  .about { --r: 32px; padding: clamp(22px, 3vw, 34px); display: grid; gap: 16px; }
+  .about-head { display: flex; align-items: center; gap: 16px; }
+  .avatar {
+    --r: 999px;
+    width: 64px; height: 64px; flex: none; display: grid; place-items: center;
+    font-family: var(--display); font-weight: 800; font-size: 1.35rem; color: var(--mist);
+    background: linear-gradient(140deg, rgba(255,255,255,0.3), rgba(255,255,255,0.06));
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+  .about h2 { font-size: 1.7rem; letter-spacing: -0.02em; }
+  .about-more { justify-self: start; font-weight: 600; color: var(--mist); border-bottom: 1px solid rgba(255,255,255,0.4); padding-bottom: 1px; }
+  .about-more:hover { border-color: var(--aqua); color: #fff; }
+
+  .projects { position: relative; padding-bottom: clamp(64px, 10vw, 120px); }
+  .section-head { margin-bottom: 28px; position: relative; z-index: 1; }
+  .section-head h2 { font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: -0.035em; }
+  .section-head p { margin-top: 10px; max-width: 46ch; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 2vw, 22px); position: relative; z-index: 1; }
+  .card { --r: 28px; padding: 14px 14px 22px; display: flex; flex-direction: column; gap: 14px; }
+  .card.featured { grid-column: span 2; --r: 32px; }
+  .thumb {
+    aspect-ratio: 16 / 10; border-radius: 18px; overflow: hidden; position: relative;
+    background: linear-gradient(135deg, hsl(var(--h1) 88% 62%), hsl(var(--h2) 82% 42%));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .featured .thumb { aspect-ratio: 16 / 8; }
+  .card-body { padding-inline: 8px; display: grid; gap: 8px; }
+  .card h3 { font-size: 1.4rem; letter-spacing: -0.02em; }
+  .featured h3 { font-size: 1.9rem; }
+  .card h3 a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; padding: 0; list-style: none; }
+  .tags li { padding: 3px 12px; font-size: 0.85rem; border-radius: 999px; background: rgba(255,255,255,0.12); color: var(--mist); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.16); }
+
+  .site-footer { padding: 0 0 calc(32px + env(safe-area-inset-bottom, 0px)); position: relative; z-index: 1; }
+  .footer-bar { --r: 999px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; padding: 16px 28px; font-size: 0.95rem; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .card.featured { grid-column: span 2; }
+    .orb-a { right: -6%; top: 2%; }
+  }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    .card.featured { grid-column: auto; }
+    .featured .thumb { aspect-ratio: 16 / 10; }
+    .footer-bar { border-radius: 28px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .blob { animation: none; }
+    *, *::before, *::after { transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<header class="site-header">
+  <a class="emblem glass" href="/" aria-label="MysticHero, home">MH</a>
+  <button class="menu-btn glass" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Menu">
+    <span class="bars" aria-hidden="true"><span></span><span></span><span></span></span>
+  </button>
+</header>
+
+<div class="scrim" aria-hidden="true"></div>
+
+<!-- Add or rename pages here. Each link should point to a page you create. -->
+<nav class="menu-panel glass" id="site-menu" aria-label="Main" inert>
+  <ul>
+    <li><a href="/" aria-current="page">Home</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<main>
+  <section class="hero">
+    <div class="orb orb-a" aria-hidden="true"></div>
+    <div class="orb orb-b" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <h1>MysticHero</h1>
+          <!-- EDIT: one line that says what you make -->
+          <p class="lede">Games, tools and experiments, built one at a time.</p>
+          <a class="cta glass" href="#projects">See my projects</a>
+        </div>
+
+        <aside class="about glass" aria-labelledby="about-title">
+          <div class="about-head">
+            <!-- EDIT: swap the initials for <img src="you.jpg" alt="Photo of you"> -->
+            <div class="avatar glass" aria-hidden="true">MH</div>
+            <h2 id="about-title">Who I am</h2>
+          </div>
+          <!-- EDIT: two or three sentences about you -->
+          <p>I'm MysticHero. Write a few sentences here about who you are, what you make, and what you're working on right now.</p>
+          <a class="about-more" href="about.html">More about me</a>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="projects" id="projects">
+    <div class="orb orb-b" style="left:auto; right:-3%; top:38%;" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Projects</h2>
+        <p>Things I've made and things I'm still making.</p>
+      </div>
+
+      <!-- EDIT: replace each card. Set each title link (href="#") to that project's own URL. For a screenshot, put <img src="..." alt="..."> inside .thumb -->
+      <div class="grid">
+        <article class="card featured glass" style="--h1:262; --h2:300;">
+          <div class="thumb"></div>
+          <div class="card-body">
+            <h3><a href="#">Project one</a></h3>
+            <p>Your main project. Say what it is and what you did in one or two lines.</p>
+            <ul class="tags"><li>Web</li><li>Featured</li></ul>
+          </div>
+        </article>
+
+        <article class="card glass" style="--h1:172; --h2:215;">
+          <div class="thumb"></div>
+          <div class="card-body">
+            <h3><a href="#">Project two</a></h3>
+            <p>A short description of this project.</p>
+            <ul class="tags"><li>Game</li></ul>
+          </div>
+        </article>
+
+        <article class="card glass" style="--h1:330; --h2:20;">
+          <div class="thumb"></div>
+          <div class="card-body">
+            <h3><a href="#">Project three</a></h3>
+            <p>A short description of this project.</p>
+            <ul class="tags"><li>Tool</li></ul>
+          </div>
+        </article>
+
+        <article class="card glass" style="--h1:38; --h2:340;">
+          <div class="thumb"></div>
+          <div class="card-body">
+            <h3><a href="#">Project four</a></h3>
+            <p>A short description of this project.</p>
+            <ul class="tags"><li>Experiment</li></ul>
+          </div>
+        </article>
+
+        <article class="card glass" style="--h1:205; --h2:270;">
+          <div class="thumb"></div>
+          <div class="card-body">
+            <h3><a href="#">Project five</a></h3>
+            <p>A short description of this project.</p>
+            <ul class="tags"><li>Design</li></ul>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bar glass">
+      <span>&copy; 2026 MysticHero</span>
+      <span>mystichero.eu</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var body = document.body;
+    var btn = document.querySelector('.menu-btn');
+    var panel = document.getElementById('site-menu');
+    var scrim = document.querySelector('.scrim');
+
+    function setMenu(open, returnFocus) {
+      body.classList.toggle('menu-open', open);
+      btn.setAttribute('aria-expanded', String(open));
+      btn.setAttribute('aria-label', open ? 'Close menu' : 'Menu');
+      panel.inert = !open;
+      if (open) panel.querySelector('a').focus();
+      else if (returnFocus) btn.focus();
+    }
+
+    btn.addEventListener('click', function () { setMenu(!body.classList.contains('menu-open'), true); });
+    scrim.addEventListener('click', function () { setMenu(false, false); });
+    panel.addEventListener('click', function (e) { if (e.target.closest('a')) setMenu(false, false); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && body.classList.contains('menu-open')) setMenu(false, true);
+    });
+
+    // Specular highlight follows the pointer across any glass surface
+    document.addEventListener('pointermove', function (e) {
+      var g = e.target.closest && e.target.closest('.glass');
+      if (!g) return;
+      var r = g.getBoundingClientRect();
+      g.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      g.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  })();
+</script>
+</body>
+</html>
